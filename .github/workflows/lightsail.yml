@@ -1,0 +1,108 @@
+name: CI and Lightsail deploy
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options: [staging, production]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: lightsail-admin-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+        continue-on-error: true
+
+  deploy:
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'))
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'staging') }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-2' }}
+      SERVICE_NAME: ${{ vars.LIGHTSAIL_SERVICE_NAME || (github.ref == 'refs/heads/main' && 'strivepay-production' || 'strivepay-staging') }}
+      ADMIN_API_URL: ${{ vars.ADMIN_API_URL }}
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install lightsailctl
+        run: |
+          curl -L -o /usr/local/bin/lightsailctl \
+            https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl
+          chmod +x /usr/local/bin/lightsailctl
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: docker build -t strivepay-admin-web:${{ github.sha }} .
+
+      - name: Push image to Lightsail
+        id: push
+        run: |
+          set -euo pipefail
+          out=$(aws lightsail push-container-image \
+            --region "$AWS_REGION" \
+            --service-name "$SERVICE_NAME" \
+            --label admin-web \
+            --image strivepay-admin-web:${{ github.sha }} 2>&1)
+          echo "$out"
+          ref=$(echo "$out" | sed -n 's/.*Refer to this image as "\([^"]*\)".*/\1/p' | tail -1)
+          echo "image=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout infra helpers
+        uses: actions/checkout@v4
+        with:
+          repository: Payblendio/strivepay-infra
+          path: infra
+
+      - name: Merge + deploy
+        shell: pwsh
+        env:
+          IMAGE: ${{ steps.push.outputs.image }}
+        run: |
+          $updates = @{ "admin-web" = $env:IMAGE }
+          $envOverrides = @{}
+          if ($env:ADMIN_API_URL) {
+            $envOverrides["admin-web"] = @{
+              ADMIN_API_URL = $env:ADMIN_API_URL
+              NEXT_PUBLIC_APP_URL = $env:NEXT_PUBLIC_APP_URL
+            }
+          }
+          & ./infra/scripts/Merge-StrivePayDeployment.ps1 `
+            -ServiceName $env:SERVICE_NAME `
+            -Region $env:AWS_REGION `
+            -ImageUpdates $updates `
+            -EnvironmentOverrides $envOverrides `
+            -OutFile ./deployment.json
+          aws lightsail create-container-service-deployment `
+            --region $env:AWS_REGION `
+            --cli-input-json file://deployment.json
