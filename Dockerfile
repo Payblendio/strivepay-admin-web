@@ -1,10 +1,16 @@
 FROM node:22-alpine AS dependencies
 WORKDIR /app
+ENV CI=true
 RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm config set dangerouslyAllowAllBuilds true && pnpm install --frozen-lockfile
 FROM dependencies AS builder
+ENV CI=true
 COPY . .
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ARG ADMIN_API_URL
+ENV ADMIN_API_URL=$ADMIN_API_URL
 RUN pnpm build
 FROM node:22-alpine AS runtime
 WORKDIR /app
