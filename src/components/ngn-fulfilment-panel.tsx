@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { OpsDetailFacts, OpsDetailSection } from "@/components/ops-detail-shell";
 import { Badge, Button, TextField } from "@/components/ui/primitives";
 import { adminFetch } from "@/lib/admin-session";
+import { useAssetCatalog } from "@/lib/asset-catalog";
 import { promptReason } from "@/lib/swal";
 import { formatAmount } from "@/lib/values";
 
@@ -75,8 +76,8 @@ export function NgnFulfilmentPanel({
   const [preview, setPreview] = useState<SwapQuote | null>(null);
   const [quote, setQuote] = useState<SwapQuote | null>(null);
 
-  const currencies = ["NGN", "USDT", "USDC", "BTC", "ETH", "TRX", destinationAsset].filter(Boolean);
-  const uniqueCurrencies = [...new Set(currencies)];
+  const catalog = useAssetCatalog();
+  const uniqueCurrencies = [...new Set(["NGN", ...catalog.map((asset) => asset.code), destinationAsset].filter(Boolean))];
   const shortfallLabel = shortfallAmount != null
     ? formatAmount(shortfallAmount, destinationAsset)
     : requiredAmount != null

@@ -1,18 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { CircleFlag } from "react-circle-flags";
+import { useAssetCatalog } from "@/lib/asset-catalog";
 
-const ROUTE_TOKENS = new Set(["USDC", "USDC_E", "USDT", "CEUR", "CUSD", "AGEUR", "EURC"]);
-const TOKEN_IMAGE: Record<string, string> = {
-  USDC: "USDC",
-  USDC_E: "USDCE",
-  USDT: "USDT",
-  CEUR: "CEUR",
-  CUSD: "CUSD",
-  AGEUR: "AGEUR",
-  EURC: "EURC",
-};
 export const FIAT_FLAG: Record<string, string> = {
   USD: "us",
   EUR: "eu",
@@ -48,26 +38,24 @@ export function isFiatAsset(code: string) {
   return Boolean(FIAT_FLAG[code]);
 }
 
-export function assetLogo(code: string, size = 32) {
+/** Round logo from the asset catalog's CoinGecko URL; falls back to the ticker's initials. */
+export function AssetLogo({ code, size = 32, url }: { code: string; size?: number; url?: string | null }) {
   const value = code.trim().toUpperCase();
-  if (ROUTE_TOKENS.has(value)) {
+  const catalog = useAssetCatalog();
+  const src = url ?? catalog.find((asset) => asset.code === value)?.logoUrl;
+  if (!src) {
     return (
-      <Image
-        src={`/branding/tokens/${TOKEN_IMAGE[value] ?? value}.png`}
-        alt={value.replace("_", ".")}
-        width={size}
-        height={size}
-      />
+      <span className="ops-asset-logo fallback" style={{ width: size, height: size, fontSize: Math.max(9, size * 0.36) }} aria-label={value}>
+        {value.replace("_", "").slice(0, 3)}
+      </span>
     );
   }
-  return (
-    <Image
-      src={`/branding/crypto/${value.toLowerCase()}.svg`}
-      alt={value}
-      width={size}
-      height={size}
-    />
-  );
+  // eslint-disable-next-line @next/next/no-img-element -- admins may point logos at any https host
+  return <img className="ops-asset-logo" src={src} alt={value.replace("_", ".")} width={size} height={size} loading="lazy" />;
+}
+
+export function assetLogo(code: string, size = 32) {
+  return <AssetLogo code={code} size={size} />;
 }
 
 export function fiatLogo(code: string, size = 34) {

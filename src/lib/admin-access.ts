@@ -49,6 +49,8 @@ export const PERMISSIONS = {
   sandboxManage: "sandbox.manage",
   coverageView: "coverage.view",
   coverageManage: "coverage.manage",
+  assetsView: "assets.view",
+  assetsManage: "assets.manage",
   webhooksView: "webhooks.view",
   webhooksManage: "webhooks.manage",
   feesView: "fees.view",

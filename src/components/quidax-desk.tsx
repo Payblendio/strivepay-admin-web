@@ -16,6 +16,7 @@ import { DataTable, TablePerson } from "@/components/ui/data-table";
 import { Badge, Button, TextField } from "@/components/ui/primitives";
 import { EmptyState } from "@/components/ui/status-state";
 import { adminFetch } from "@/lib/admin-session";
+import { useAssetCatalog } from "@/lib/asset-catalog";
 import { promptReason } from "@/lib/swal";
 import { formatAmount, toneForStatus } from "@/lib/values";
 
@@ -155,11 +156,13 @@ export function QuidaxDesk({
     }
   }
 
+  const catalog = useAssetCatalog();
   const currencyOptions = useMemo(() => {
     const codes = new Set(wallets.map((row) => row.currency).filter(Boolean));
-    ["NGN", "TRX", "USDT", "BTC", "ETH", "USDC"].forEach((code) => codes.add(code));
+    codes.add("NGN");
+    catalog.forEach((asset) => codes.add(asset.code));
     return [...codes].sort();
-  }, [wallets]);
+  }, [wallets, catalog]);
 
   async function runPreview() {
     setBusy(true);

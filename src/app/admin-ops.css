@@ -1737,3 +1737,50 @@
     grid-template-columns: 1fr;
   }
 }
+
+.ops-asset-logo {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+  background: var(--sp-surface-2, #f1f3f5);
+}
+
+.ops-asset-logo.fallback {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--sp-text-2, #495057);
+}
+
+
+.ops-asset-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ops-asset-cell > span:last-child {
+  display: grid;
+}
+
+.ops-asset-cell small {
+  color: var(--sp-text-3, #868e96);
+}
+
+.ops-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ops-catalog-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+

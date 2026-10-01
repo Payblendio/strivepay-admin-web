@@ -30,6 +30,7 @@ import {
   IconWorldWww,
   IconWallet,
   IconCashBanknote,
+  IconCurrencyBitcoin,
 } from "@tabler/icons-react";
 import { canSeeOverview, hasPermission, homePath, PERMISSIONS } from "@/lib/admin-access";
 import { adminFetch } from "@/lib/admin-session";
@@ -87,6 +88,7 @@ const groups: NavGroup[] = [
   {
     label: "Platform",
     items: [
+      { label: "Assets", href: "/assets", icon: IconCurrencyBitcoin, hint: "Coins & networks", visible: (p) => hasPermission(p, PERMISSIONS.assetsView) || hasPermission(p, PERMISSIONS.assetsManage) },
       { label: "Webhooks", href: "/webhooks", icon: IconWebhook, hint: "Provider events", visible: (p) => hasPermission(p, PERMISSIONS.webhooksView) },
       { label: "Business webhooks", href: "/business-webhooks", icon: IconWorldWww, hint: "Merchant deliveries", visible: (p) => hasPermission(p, PERMISSIONS.webhooksView) },
       { label: "Notifications", href: "/notifications", icon: IconBell, hint: "Delivery retries", visible: (p) => hasPermission(p, PERMISSIONS.notificationsView) },
