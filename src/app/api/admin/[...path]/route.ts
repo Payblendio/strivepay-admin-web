@@ -31,6 +31,8 @@ const ROUTES: Array<{ pattern: RegExp; methods: Set<string> }> = [
   { pattern: new RegExp(`^customers/${UUID}/members$`), methods: new Set(["GET"]) },
   { pattern: /^account-deletions$/, methods: new Set(["GET"]) },
   { pattern: new RegExp(`^account-deletions/${UUID}/complete$`), methods: new Set(["POST"]) },
+  { pattern: /^data-deletions$/, methods: new Set(["GET"]) },
+  { pattern: new RegExp(`^data-deletions/${UUID}/(complete|reject)$`), methods: new Set(["POST"]) },
   { pattern: /^pay-in-accounts$/, methods: new Set(["GET"]) },
   { pattern: new RegExp(`^pay-in-accounts/${UUID}$`), methods: new Set(["GET"]) },
   { pattern: new RegExp(`^pay-in-accounts/${UUID}/transactions$`), methods: new Set(["GET"]) },
