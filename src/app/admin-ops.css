@@ -387,6 +387,84 @@
   min-width: 0;
 }
 
+.ops-cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ops-cell-stack small {
+  color: #7a8599;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.ops-cell-truncate {
+  display: block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ops-cell-error {
+  color: #b42d42;
+  font-size: 12px;
+}
+
+.ops-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ops-channel-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  background: #eef1f6;
+  color: #4f5b71;
+}
+
+.ops-channel-icon.md {
+  width: 44px;
+  height: 44px;
+}
+
+.ops-channel-icon.email {
+  background: #e6f8fb;
+  color: #087f91;
+}
+
+.ops-channel-icon.push {
+  background: #eef0ff;
+  color: #4c4fc4;
+}
+
+.ops-message-body {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #e3e8ef;
+  background: #f8fafc;
+  color: #1d2940;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ops-message-title {
+  margin: 0 0 10px;
+  color: #0b1733;
+  font-size: 16px;
+  font-weight: 700;
+}
+
 .ops-currency-code {
   display: inline-flex;
   align-items: center;
