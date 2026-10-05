@@ -6,7 +6,7 @@ import {confirmSupportLeave} from "@/lib/use-support-unload-warning";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import {
   IconLayoutDashboard,
   IconLogout,
@@ -36,6 +36,8 @@ import { canSeeOverview, hasPermission, homePath, PERMISSIONS } from "@/lib/admi
 import { adminFetch } from "@/lib/admin-session";
 import type { AdminPrincipal } from "@/lib/admin-types";
 import { initials } from "@/lib/values";
+
+const SIDEBAR_SCROLL_KEY = "ops-sidebar-scroll";
 
 const HEARTBEAT_MS = 4 * 60 * 1000;
 
@@ -111,6 +113,7 @@ export function OpsShell({ principal, eyebrow, title, copy, children }: OpsShell
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
   const visibleGroups = groups
     .map((group) => ({ ...group, items: group.items.filter((item) => item.visible(principal.permissions)) }))
     .filter((group) => group.items.length > 0);
@@ -124,6 +127,26 @@ export function OpsShell({ principal, eyebrow, title, copy, children }: OpsShell
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, []);
+
+  useEffect(() => {
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+    const saved = Number(window.sessionStorage.getItem(SIDEBAR_SCROLL_KEY));
+    if (Number.isFinite(saved) && saved > 0) sidebar.scrollTop = saved;
+    const active = sidebar.querySelector<HTMLElement>(".dashboard-nav-item.active");
+    if (active) {
+      const box = sidebar.getBoundingClientRect();
+      const item = active.getBoundingClientRect();
+      if (item.top < box.top + 24 || item.bottom > box.bottom - 24) {
+        sidebar.scrollTop += item.top - box.top - (box.height - item.height) / 2;
+      }
+    }
+    function remember() {
+      window.sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(sidebar!.scrollTop));
+    }
+    sidebar.addEventListener("scroll", remember, { passive: true });
+    return () => sidebar.removeEventListener("scroll", remember);
+  }, [pathname]);
 
   useEffect(() => {
     let timer = 0;
@@ -156,7 +179,7 @@ export function OpsShell({ principal, eyebrow, title, copy, children }: OpsShell
     <main className={`dashboard-shell${menuOpen ? " menu-open" : ""}`}>
       <button className="dashboard-scrim" type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />
 
-      <aside className="dashboard-sidebar" id="dashboard-sidebar" aria-label="Operations navigation">
+      <aside ref={sidebarRef} className="dashboard-sidebar" id="dashboard-sidebar" aria-label="Operations navigation">
         <div className="dashboard-sidebar-brand">
           <Link href={home} aria-label="StrivePay operations">
             <Image className="ops-dark-logo" src="/branding/strivepay-logo-dark.svg" width={160} height={42} alt="StrivePay" priority />
