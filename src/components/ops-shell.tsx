@@ -13,6 +13,7 @@ import {
   IconMenu2,
   IconShieldLock,
   IconUsers,
+  IconUserX,
   IconX,
   IconArrowsExchange,
   IconWebhook,
@@ -85,6 +86,7 @@ const groups: NavGroup[] = [
     label: "Customers",
     items: [
       { label: "Customers", href: "/customers", icon: IconUsers, hint: "Accounts", visible: (p) => hasPermission(p, PERMISSIONS.customersView) },
+      { label: "Account deletions", href: "/account-deletions", icon: IconUserX, hint: "Closure reviews", visible: (p) => hasPermission(p, PERMISSIONS.customersView) || hasPermission(p, PERMISSIONS.customersManage) },
     ],
   },
   {

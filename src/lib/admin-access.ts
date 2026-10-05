@@ -44,6 +44,7 @@ export const PERMISSIONS = {
   supportNotes: "support.notes",
   supportManage: "support.manage",
   customersView: "customers.view",
+  customersManage: "customers.manage",
   transactionsView: "transactions.view",
   transactionsManage: "transactions.manage",
   sandboxManage: "sandbox.manage",
