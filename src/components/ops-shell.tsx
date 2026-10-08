@@ -2,6 +2,7 @@
 import { OpsAccountMenu } from "./ops-account-menu";
 import {SupportUnreadBadge} from "./support-unread-badge";
 import {confirmSupportLeave} from "@/lib/use-support-unload-warning";
+import { GlobalSearch, SearchTrigger, type SearchPage } from "./global-search";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -117,19 +118,35 @@ export function OpsShell({ principal, eyebrow, title, copy, children }: OpsShell
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const visibleGroups = groups
     .map((group) => ({ ...group, items: group.items.filter((item) => item.visible(principal.permissions)) }))
     .filter((group) => group.items.length > 0);
+  const searchPages: SearchPage[] = [
+    ...visibleGroups.flatMap((group) => group.items.map((item) => ({ label: item.label, href: item.href, group: group.label, hint: item.hint, icon: item.icon }))),
+    { label: "Sessions", href: "/sessions", group: "Account", hint: "Signed-in devices", icon: IconShieldLock },
+  ];
   const home = homePath(principal.permissions);
   const name = principal.displayName || principal.email;
 
   useEffect(() => {
-    function close(event: KeyboardEvent) {
+    function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") setMenuOpen(false);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen((open) => !open);
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      const typing = target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+      if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
     }
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   useEffect(() => {
@@ -246,6 +263,7 @@ export function OpsShell({ principal, eyebrow, title, copy, children }: OpsShell
             <p>{copy}</p>
           </div>
           <div className="ops-header-actions">
+            <SearchTrigger onOpen={() => setSearchOpen(true)} />
             <div className="dashboard-profile" aria-label={`Signed in as ${principal.email}`}>
               <span>{initials(name)}</span>
               <div>
@@ -257,6 +275,7 @@ export function OpsShell({ principal, eyebrow, title, copy, children }: OpsShell
         </header>
         <div className="ops-page">{children}</div>
       </section>
+      <GlobalSearch pages={searchPages} open={searchOpen} onClose={() => setSearchOpen(false)} />
     </main>
   );
 }
