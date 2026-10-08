@@ -33,7 +33,7 @@ function dayLabel(day: string) {
 }
 
 function buildChart(days: OverviewChartDay[]) {
-  const maximum = Math.max(1, ...days.map((day) => day.total));
+  const maximum = Math.max(4, Math.ceil(Math.max(0, ...days.map((day) => day.total)) / 4) * 4);
   const points = days.map((day, index) => {
     const x = CHART_LEFT + (days.length <= 1 ? 0 : (index / (days.length - 1)) * (CHART_RIGHT - CHART_LEFT));
     const y = CHART_BOTTOM - (day.total / maximum) * (CHART_BOTTOM - CHART_TOP);

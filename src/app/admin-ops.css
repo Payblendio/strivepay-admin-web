@@ -186,6 +186,7 @@
 .ops-overview-split {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, .9fr);
+  align-items: start;
   gap: 14px;
 }
 
@@ -666,7 +667,7 @@
   height: 42px;
   padding: 0 8px 0 13px;
   border: 1px solid #dfe6ee;
-  border-radius: 12px;
+  border-radius: 0;
   background: #fff;
   color: #6a7d8b;
   font: inherit;
@@ -688,7 +689,7 @@
   padding: 0 6px;
   border: 1px solid #dfe6ee;
   border-bottom-width: 2px;
-  border-radius: 6px;
+  border-radius: 0;
   background: #f6f8fb;
   color: #5f7380;
   font: 700 11px/1 inherit;
@@ -714,7 +715,7 @@
   max-height: min(680px, 82vh);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .7);
-  border-radius: 20px;
+  border-radius: 0;
   background: #fff;
   box-shadow: 0 30px 90px rgba(11, 23, 51, .32);
   animation: ops-search-rise .16s ease-out;
@@ -759,7 +760,7 @@
   width: 100%;
   padding: 9px 10px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 0;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -773,7 +774,7 @@
   flex: none;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: 0;
   background: #f2f5f9;
   color: #5f7380;
 }
@@ -788,7 +789,7 @@
   max-width: 34%;
   overflow: hidden;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 0;
   background: #f2f5f9;
   color: #5f7380;
   font-size: 11px;
@@ -1154,7 +1155,7 @@
   background-position: center;
 }
 
-/* Inline checkbox rows — never wrap checkboxes in .sp-field (that stacks label/control). */
+/* Inline checkbox rows â€” never wrap checkboxes in .sp-field (that stacks label/control). */
 .ops-check-list {
   margin: 0;
   padding: 0;
