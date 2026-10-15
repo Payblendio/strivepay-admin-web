@@ -39,6 +39,7 @@ export function signedInLanding(returnTo?: string | null) {
 }
 
 export const PERMISSIONS = {
+  rateAlertsManage: "rate_alerts.manage",
   supportView: "support.view",
   supportReply: "support.reply",
   supportNotes: "support.notes",
@@ -82,6 +83,7 @@ export function homePath(permissions: Iterable<string> | undefined) {
   if (hasPermission(permissions, PERMISSIONS.customersView)) return "/customers";
   if (hasPermission(permissions, PERMISSIONS.treasuryView)) return "/treasury";
   if (hasPermission(permissions, PERMISSIONS.webhooksView)) return "/webhooks";
+  if (hasPermission(permissions, PERMISSIONS.rateAlertsManage)) return "/rate-alerts";
   if (hasPermission(permissions, PERMISSIONS.notificationsView)) return "/notifications";
   if (hasPermission(permissions, PERMISSIONS.complianceManage)) return "/compliance";
   if (hasPermission(permissions, PERMISSIONS.adminsManage)) return "/team";

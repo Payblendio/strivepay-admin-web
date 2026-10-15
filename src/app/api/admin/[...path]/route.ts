@@ -7,6 +7,9 @@ import { hasValidRequestOrigin } from "@/lib/request-origin";
 const UUID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
 const ROUTES: Array<{ pattern: RegExp; methods: Set<string> }> = [
+  { pattern: /^rate-alerts$/, methods: new Set(["GET", "PUT"]) },
+  { pattern: /^rate-alerts\/(preview|runs)$/, methods: new Set(["GET"]) },
+  { pattern: /^rate-alerts\/(force|test)$/, methods: new Set(["POST"]) },
   { pattern: /^overview$/, methods: new Set(["GET"]) },
   { pattern: /^exchange-rates$/, methods: new Set(["GET", "PUT"]) },
   { pattern: /^exchange-rates\/majors$/, methods: new Set(["GET"]) },

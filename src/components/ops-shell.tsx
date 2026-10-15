@@ -95,6 +95,7 @@ const groups: NavGroup[] = [
   {
     label: "Platform",
     items: [
+      { label: "Rate alerts", href: "/rate-alerts", icon: IconBell, hint: "Schedules & currencies", visible: (p) => hasPermission(p, PERMISSIONS.rateAlertsManage) },
       { label: "Assets", href: "/assets", icon: IconCurrencyBitcoin, hint: "Coins & networks", visible: (p) => hasPermission(p, PERMISSIONS.assetsView) || hasPermission(p, PERMISSIONS.assetsManage) },
       { label: "Webhooks", href: "/webhooks", icon: IconWebhook, hint: "Provider events", visible: (p) => hasPermission(p, PERMISSIONS.webhooksView) },
       { label: "Business webhooks", href: "/business-webhooks", icon: IconWorldWww, hint: "Merchant deliveries", visible: (p) => hasPermission(p, PERMISSIONS.webhooksView) },
