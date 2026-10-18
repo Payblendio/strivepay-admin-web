@@ -1,0 +1,59 @@
+name: Deploy staging admin web to VPS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vps-staging-admin-web
+  cancel-in-progress: true
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - uses: docker/setup-buildx-action@v3
+      - run: |
+          docker build -t strivepay-admin-web:${GITHUB_SHA} .
+          docker save strivepay-admin-web:${GITHUB_SHA} | gzip -1 > /tmp/strivepay-admin-web.tar.gz
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Transfer and deploy
+        env:
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER || 'ubuntu' }}
+          VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH || '/opt/strivepay' }}
+        run: |
+          scp /tmp/strivepay-admin-web.tar.gz "${VPS_USER}@${VPS_HOST}:/tmp/strivepay-admin-web.tar.gz"
+          ssh "${VPS_USER}@${VPS_HOST}" bash -s -- "$GITHUB_SHA" "$VPS_DEPLOY_PATH" <<'REMOTE'
+          set -euo pipefail
+          sha="$1"
+          deploy_path="$2"
+          gzip -dc /tmp/strivepay-admin-web.tar.gz | docker load
+          rm -f /tmp/strivepay-admin-web.tar.gz
+          docker tag "strivepay-admin-web:${sha}" strivepay-admin-web:staging
+          cd "$deploy_path"
+          docker compose up -d --no-deps admin-web
+          docker inspect strivepay-staging-admin-web-1 >/dev/null
+          REMOTE
+
