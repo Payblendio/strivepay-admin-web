@@ -98,13 +98,30 @@ export default async function OverviewPage() {
               <p>Error budgets are unavailable right now.</p>
             ) : budgets.length ? (
               <div className="ops-stat-grid">
-                {budgets.slice(0, 6).map((row) => (
-                  <article className="ops-stat-card" key={text(row, "id", "name", "slug")}>
-                    <span>{text(row, "name", "slug", "service")}</span>
-                    <strong>{text(row, "remaining", "budget", "status")}</strong>
-                    <small>{text(row, "window", "period", "detail")}</small>
-                  </article>
-                ))}
+                {budgets.slice(0, 6).map((row) => {
+                  const status = text(row, "status");
+                  const requests = text(row, "totalRequests", "total_requests");
+                  const failed = text(row, "failedRequests", "failed_requests");
+                  const success = text(row, "successRate", "success_rate");
+                  const burn = text(row, "burnRate", "burn_rate");
+                  const p95 = text(row, "p95DurationMs", "p95_duration_ms");
+                  const windowMinutes = text(row, "windowMinutes", "window_minutes");
+                  return (
+                    <article className="ops-stat-card" key={text(row, "id", "journeyCode", "journey_code")}>
+                      <span>{text(row, "displayName", "display_name", "journeyCode", "journey_code")}</span>
+                      <strong>
+                        <Badge tone={toneForStatus(status)} dot>{status}</Badge>
+                      </strong>
+                      <small>
+                        {windowMinutes === "—" ? "—" : `${windowMinutes}m`} · req {requests}
+                        {failed !== "—" ? ` · fail ${failed}` : ""}
+                        {success !== "—" ? ` · success ${success}` : ""}
+                        {burn !== "—" ? ` · burn ${burn}` : ""}
+                        {p95 !== "—" ? ` · p95 ${p95} ms` : ""}
+                      </small>
+                    </article>
+                  );
+                })}
               </div>
             ) : (
               <p>No error-budget snapshots.</p>

@@ -18,6 +18,7 @@ type Search = Promise<{
   direction?: string | string[];
   service?: string | string[];
   responseStatus?: string | string[];
+  correlationId?: string | string[];
   page?: string | string[];
 }>;
 
@@ -30,6 +31,7 @@ export default async function ApiRequestLogsPage({ searchParams }: { searchParam
   const direction = first(params.direction);
   const service = first(params.service);
   const responseStatus = first(params.responseStatus);
+  const correlationId = first(params.correlationId);
   const page = Math.max(0, Number(first(params.page) || 0) || 0);
   const size = 20;
   const { token, principal } = await requireAdmin(PERMISSIONS.auditView, "/logs/api");
@@ -38,6 +40,7 @@ export default async function ApiRequestLogsPage({ searchParams }: { searchParam
   if (direction) query.set("direction", direction);
   if (service) query.set("service", service);
   if (responseStatus) query.set("responseStatus", responseStatus);
+  if (correlationId) query.set("correlationId", correlationId);
 
   const response = await adminBackend(token, `/v1/admin/api-request-logs?${query}`);
   const loadOk = response.ok;
@@ -49,6 +52,7 @@ export default async function ApiRequestLogsPage({ searchParams }: { searchParam
     if (direction) next.set("direction", direction);
     if (service) next.set("service", service);
     if (responseStatus) next.set("responseStatus", responseStatus);
+    if (correlationId) next.set("correlationId", correlationId);
     if (nextPage > 0) next.set("page", String(nextPage));
     const search = next.toString();
     return search ? `/logs/api?${search}` : "/logs/api";
@@ -77,6 +81,10 @@ export default async function ApiRequestLogsPage({ searchParams }: { searchParam
         <label className="sp-field">
           <span>Response status</span>
           <input name="responseStatus" defaultValue={responseStatus} placeholder="e.g. 500" inputMode="numeric" />
+        </label>
+        <label className="sp-field">
+          <span>Correlation ID</span>
+          <input name="correlationId" defaultValue={correlationId} placeholder="UUID from alert email" />
         </label>
         <button className="sp-button primary medium" type="submit">Filter</button>
       </form>
